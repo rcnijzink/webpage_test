@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<script type="text/javascript"
+  src="dygraph-combined-dev.js"></script>
+    <title>FLEXtopoXL</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+        <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+      #model_structure {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 5px;
+        bottom: 25px;
+        height: 150px;
+        width: 25%;
+        position: absolute;
+        right: 50px;
+        z-index:1;
+      }
+      #landscapes {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 5px;
+        bottom: 220px;
+        height: 250px;
+        width: 25%;
+        position: absolute;
+        right: 50px;
+      }
+      #legend_landscapes {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 5px;
+        bottom: 220px;
+        height: 120px;
+        width: 10%;
+        position: absolute;
+        right: 50px;
+        z-index:1;
+      }
+      #info-box {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 5px;
+        bottom: 25px;
+        height: 150px;
+        width: 10%;
+        position: absolute;
+        left: 30px;
+      }
+      #plot-box {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 5px;
+        bottom: 25px;
+        height: 150px;
+        width: 58%;
+        position: absolute;
+        left: 250px;
+        right: 30px;
+      }
+     #budyko-box {
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 5px;
+        bottom: 250px;
+        height: 150px;
+        width: 58%;
+        position: absolute;
+        left: 250px;
+        right: 30px;
+      }
+     #legend {
+        font-family: Arial, sans-serif;
+	font-size:10px;
+        background: white;
+        border: 1px solid black;
+        bottom: 200px;
+        left: 30px;
+        width: 20px;
+        height: 150px;
+	position: absolute;
+      }
+      #legend h3 {
+        margin-top: 0;
+        size:0.2;
+      }
+      #legendtext {
+        font-family: Arial, sans-serif;
+        background: none;
+        bottom: 198px;
+        left: 55px;
+        width: 15px;
+        height: 165px;
+	position: absolute;
+      }
+
+     #tickbox {
+        background-color: none;
+        bottom: 500px;
+        height: 10px;
+        position: absolute;
+        left: 20px;
+
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <img id="legend_landscapes" src="legend.png"></img>
+    <img id="model_structure"  onmouseover="bigImg(this)" onmouseout="normalImg(this)"></img>
+    <img id="landscapes"  onmouseover="bigImg_landscape(this)" onmouseout="normalImg_landscape(this)"></img>
+    <div id="legend">  </div>
+    <div id="legendtext"> 
+      -1 <br>
+	<br>
+	<br>
+	<br>
+       0 <br>
+	<br>
+	<br>
+	<br>
+       1 <br>
+ </div>
+    <div id="info-box">No basin selected</div>
+    <div id="plot-box">No basin selected</div>
+	<div id="tickbox",action="" >
+ 		 <input id="checkboxNSE" name="obj"type="radio" onclick="setMap(this,'NSE');" checked> NSE<br>
+ 		 <input id="checkboxlogNSE" name="obj" type="radio"  onclick="setMap(this,'LNSE');" unchecked> logNSE<br>
+ 		 <input id="checkboxKGE" name="obj" type="radio"  onclick="setMap(this,'KGE');" unchecked> KGE<br>
+ 		 <input id="checkboxlogKGE" name="obj" type="radio"  onclick="setMap(this,'LKGE');" unchecked> logKGE<br>
+ 		 <input id="checkboxlogVE" name="obj" type="radio"  onclick="setMap(this,'VE');" unchecked> VE<br>
+	</div>	
+
+
+    <script>
+      var map;
+
+	function setMap(cb,metric) {
+
+
+        map.data_eubasins.setStyle(styleFeature);
+
+        function styleFeature(feature) {
+           var low = [5, 69, 54];  // color of smallest datum
+           var high = [151, 83, 34];   // color of largest datum
+
+          // delta represents where the value sits between the min and max
+          var delta = (feature.getProperty(metric) - (-1) ) /
+                   (1 - (-1) );
+
+          var color = [];
+          for (var i = 0; i < 3; i++) {
+          // calculate an integer color based on the delta
+           color[i] = (high[i] - low[i]) * delta + low[i];
+           }
+
+          // determine whether to show this shape or not
+          var showRow = true;
+          var alpha = 0.75;
+          if (feature.getProperty(metric) == 0.000 ||
+           feature.getProperty(metric) == -9999 ||
+              isNaN(feature.getProperty(metric))) {
+          //color = [0, 0, 66]
+          color =[5, 69, 54]
+          alpha = 0.6
+          //showRow = false;
+          }
+
+          var outlineWeight = 0.5, zIndex = 1;
+         //  if (feature.getProperty('state') === 'hover') {
+         //    outlineWeight = zIndex = 2;
+         //  }
+
+
+
+
+
+        return {
+           strokeWeight: outlineWeight,
+           strokeColor: '#fff',
+           zIndex: zIndex,
+           fillColor: 'hsl(' + color[0] + ',' + color[1] + '%,' + color[2] + '%)',
+           fillOpacity: alpha,
+           visible: showRow
+         };
+        }
+        }
+
+      
+
+        
+
+function bigImg(x) {
+    x.style.height = "600px";
+    x.style.width = "80%";
+}
+
+function normalImg(x) {
+    x.style.height = "150px";
+    x.style.width = "25%";
+}
+
+function bigImg_landscape(x) {
+    x.style.height = "600px";
+    x.style.width = "60%";
+}
+
+function normalImg_landscape(x) {
+    x.style.height = "250px";
+    x.style.width = "25%";
+}
+
+      function initialize() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 5,
+          center: new google.maps.LatLng(50.7, 9.5),
+          mapTypeId: google.maps.MapTypeId.TERRAIN
+        });
+
+
+	///////////////////////////////////////////////////////
+        // Add data.
+
+        map.data_eubasins = new google.maps.Data();
+	var script_eubasins = document.createElement('script');
+
+//        script_eubasins.src = 'google_maps/eu_basins_v2.geojsonp';
+        script_eubasins.src = 'google_maps/Constraining_basins_v6.geojsonp';
+//       script_eubasins.src = 'https://dl.dropboxusercontent.com/s/gb303sk92ndj97a/Constraining_basins_v6.geojsonp?dl=0'
+        document.getElementsByTagName('head')[0].appendChild(script_eubasins);
+
+	// Loop through the results array and place a marker for each
+	eqfeed_callback_GRDC = function(results) {
+
+         map.data_eubasins.addGeoJson(results);
+      		}
+         map.data_eubasins.setMap(map);
+
+	// Add some style.
+        setMap(this, 'NSE');
+
+    
+	map.data_eubasins.addListener('click', function(event) {
+        
+        // show info
+   	document.getElementById('info-box').innerHTML =
+'<table>'+
+  '<col width="130">'+
+ ' <col width="80">'+
+ '<tr style="height:2px">' +
+    '<th<FONT SIZE=2>Info</font></th>'+
+    '<th></th>'+
+  '</tr>'+
+  '<tr style="height:2px">' +
+    '<td><FONT SIZE=1>Area [km<sup>2</sup>]</td>'+
+    '<td><FONT SIZE=1>'+ event.feature.getProperty("AREA") +'</font></td>'+
+  '</tr>'+
+'<tr style="height:2px">' +
+    '<td><FONT SIZE=1>GRDC_NO</td>'+
+    '<td><FONT SIZE=1>'+ event.feature.getProperty("GRDC_NO") +'</font></td>'+
+ '</tr>'+
+ '<tr style="height:2px">' +
+    '<td><FONT SIZE=1>NSE</td>'+
+  //  '<td><FONT SIZE=1>'+ event.feature.getProperty("NSE") +'</font></td>'+
+ '</tr>'+
+ '<tr style="height:2px">' +
+    '<td><FONT SIZE=1>LNSE</td>'+
+  //  '<td><FONT SIZE=1>'+ event.feature.getProperty("LNSE") +'</font></td>'+
+ '</tr>'+
+ '<tr style="height:2px">' +
+    '<td><FONT SIZE=1>KGE</font></td>'+
+  //  '<td><FONT SIZE=1>'+ event.feature.getProperty("KGE") +'</font></td>'+
+ '</tr>'+
+ '<tr style="height:2px">' +
+    '<td><FONT SIZE=1>LKGE</font></td>'+
+  //  '<td><FONT SIZE=1>'+ event.feature.getProperty("LKGE") +'</font></td>'+
+ '</tr>'+
+'</table>'
+
+
+
+
+
+    //    document.getElementById('info-box').innerHTML =
+    //   '<div  Area:' + event.feature.getProperty("AREA")  + '</div>';
+//       "Area   :" + event.feature.getProperty("AREA") + '<br>';
+	    
+       //show model structure
+       document.getElementById("model_structure").src= 
+             event.feature.getProperty("GRDC_NO") + "/model_structure.gif";
+		document.getElementById("model_structure").hover = function(){this.width()*1, this.height*1;}
+
+document.getElementById("landscapes").src= 
+             event.feature.getProperty("GRDC_NO") + "/landscapes.gif";
+		document.getElementById("model_structure").hover = function(){this.width()*1, this.height*1;}
+
+
+         g = new Dygraph(
+
+	    // containing div
+	    document.getElementById("plot-box"), 
+           event.feature.getProperty("GRDC_NO") +"/model_output/Cal/Qmod.csv" ,
+           {
+		title: event.feature.getProperty("RIVER") + " (" +event.feature.getProperty("GRDC_NO") +")" ,
+                height: "10px",
+                rightGap: "50",
+		ylabel: "Q [mm/d]",
+		axisLabelWidth:(10,70),
+		//color:["blue","red"],
+		valueRange: [0.0, 10],
+		}
+
+
+
+
+	  )
+//});
+
+         g2 = new Dygraph(
+
+	    // containing div
+	    document.getElementById("budyko-box"), 
+           //event.feature.getProperty("GRDC_NO") +"/model_output/Cal/Qmod.csv" ,
+           "budyko_selection.csv" ,
+           {
+		title: event.feature.getProperty("Budyko") ,
+                height: "10px",
+                rightGap: "50",
+		ylabel: "Q [mm/d]",
+		axisLabelWidth:(10,70),
+		//color:["blue","red"],
+		valueRange: [0.0, 10],
+		}
+
+
+
+
+	  )
+});
+
+
+           var legend = document.getElementById('legend');
+           var low = [5, 69, 54];  // color of smallest datum
+           var high = [151, 83, 34];   // color of largest datum
+
+          // delta represents where the value sits between the min and max
+          //var delta = [0 0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9, 1]
+          var delta = [];
+          for (var j_delta = 0; j_delta < 100; j_delta++){
+              delta[j_delta]= 0 + j_delta*0.01;
+          }
+          var values = [-1 -0.9, -0.8, ,0.4,0.5,0.6,0.7,0.8,0.9, 1]
+          var color = [];
+          for (var j = 0; j < 100; j++) {
+          for (var i = 0; i < 3; i++) {
+          // calculate an integer color based on the delta
+           color[i] = (high[i] - low[i]) * delta[j] + low[i];
+		}
+           var div = document.createElement('div');
+           div.innerHTML = '<div style="position: relative;left:0px;right=0px;height:1.5px;width:20px;background-color:' + 'hsl(' + color[0] + ',' + color[1] + '%,' + color[2] + '%)"</div> <font >'+ " "+'</font>'  ; 
+          legend.appendChild(div)
+        }
+
+
+
+
+
+      }
+
+  
+
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBh6CLT92qp5Ix-2CZU5YEFOfeW4qivtK8&libraries=visualization&callback=initialize">
+    </script>
+
+
+    
+</body>
+</html>
